@@ -1,0 +1,14 @@
+# Ignore files directory - it will be mounted as a volume
+files/
+
+# Ignore git files
+.git
+.gitignore
+
+# Ignore documentation
+README.md
+
+# Ignore docker files
+docker-compose.yml
+.dockerignore
+

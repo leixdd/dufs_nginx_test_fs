@@ -1,0 +1,6 @@
+# Ignore all files in the files directory
+files/*
+
+# Keep the directory structure
+!files/.gitkeep
+
