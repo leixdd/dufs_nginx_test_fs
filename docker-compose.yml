@@ -13,5 +13,5 @@ services:
     container_name: dufs-fileserver
     volumes:
       - ./files:/data:rw
-    command: /data -A --allow-upload -a ${DUFS_AUTH}@/:rw
+    command: /data -A --allow-upload -a ${DUFS_AUTH}@/:rw --port 80
     restart: unless-stopped
