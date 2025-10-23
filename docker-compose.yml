@@ -9,7 +9,9 @@ services:
     restart: unless-stopped
 
   fileserver:
-    image: sigoden/dufs:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile.dufs
     container_name: dufs-fileserver
     volumes:
       - ./files:/data:rw

@@ -1,0 +1,3 @@
+FROM sigoden/dufs:latest
+WORKDIR /data
+EXPOSE 80
