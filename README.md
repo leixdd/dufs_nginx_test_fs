@@ -28,6 +28,8 @@ A dual file server setup with both **Nginx** (simple static serving) and **Dufs*
 
 ## Quick Start
 
+### Local Development
+
 1. **Clone or navigate to this directory**
 
 2. **Add your files**
@@ -55,25 +57,37 @@ A dual file server setup with both **Nginx** (simple static serving) and **Dufs*
    - **Nginx** (simple, no auth): http://localhost:8080
    - **Dufs** (advanced, with auth): http://localhost:5001
 
+### Coolify Deployment
+
+See the [Deployment](#deployment) section below for Coolify-specific instructions.
+
 ## Services
 
 ### Nginx Service
-- **Port**: Configurable via `NGINX_PORT` environment variable (default: 8080)
-- **Access**: http://localhost:${NGINX_PORT}
+- **Port**: 
+  - Local: Configurable via `NGINX_PORT` environment variable (e.g., 8080)
+  - Coolify: Automatically assigned by platform
+- **Access**: 
+  - Local: http://localhost:${NGINX_PORT}
+  - Coolify: Provided by platform dashboard
 - **Features**: Directory listing, PDF/image serving, caching
 - **Authentication**: None
 - **Permissions**: Read-only
 
 ### Dufs Service
-- **Port**: Configurable via `DUFS_PORT` environment variable (default: 5001)
-- **Access**: http://localhost:${DUFS_PORT}
+- **Port**: 
+  - Local: Configurable via `DUFS_PORT` environment variable (e.g., 5001)
+  - Coolify: Automatically assigned by platform
+- **Access**: 
+  - Local: http://localhost:${DUFS_PORT}
+  - Coolify: Provided by platform dashboard
 - **Features**: Upload, delete, ZIP download, search, authentication
 - **Authentication**: Required via `DUFS_AUTH` environment variable
 - **Permissions**: Read-write with uploads enabled
 
 ## Usage
 
-### Starting the Servers
+### Starting the Servers (Local Development)
 
 Start both services:
 ```bash
@@ -110,11 +124,30 @@ docker-compose logs -f fileserver
 docker-compose up -d --build
 ```
 
+**Note**: For Coolify deployments, service management is handled through the Coolify dashboard.
+
+## Docker Compose Files
+
+This project includes two docker-compose files:
+
+### docker-compose.yml (Local Development)
+- Exposes ports via `NGINX_PORT` and `DUFS_PORT` environment variables
+- Suitable for local development and self-hosted deployments
+- Requires all three environment variables: `NGINX_PORT`, `DUFS_PORT`, `DUFS_AUTH`
+
+### docker-compose-coolify.yml (Coolify Deployment)
+- No port mappings (Coolify manages ports automatically)
+- Optimized for Coolify platform deployment
+- Only requires `DUFS_AUTH` environment variable
+- Coolify automatically handles port assignment and SSL
+
 ## Configuration
 
 ### Environment Variables
 
-This project requires the following environment variables:
+Environment variable requirements depend on which docker-compose file you're using:
+
+#### For docker-compose.yml (Local Development)
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -135,11 +168,19 @@ Or inline:
 NGINX_PORT=8080 DUFS_PORT=5001 DUFS_AUTH="admin:secret" docker-compose up -d
 ```
 
-**Note**: The `@/:rw` suffix is automatically added to `DUFS_AUTH` in the docker-compose.yml configuration to grant read-write access to the root path.
+#### For docker-compose-coolify.yml (Coolify Deployment)
 
-### Change Ports
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DUFS_AUTH` | Yes | - | Authentication for dufs (format: `username:password`) |
 
-Ports are configured via environment variables. Simply change the values:
+Ports are automatically managed by Coolify, so `NGINX_PORT` and `DUFS_PORT` are not needed.
+
+**Note**: The `@/:rw` suffix is automatically added to `DUFS_AUTH` in both docker-compose files to grant read-write access to the root path.
+
+### Change Ports (Local Development)
+
+For local development with `docker-compose.yml`, ports are configured via environment variables:
 
 ```bash
 # Use different ports
@@ -148,6 +189,8 @@ export DUFS_PORT=3001
 export DUFS_AUTH="admin:password"
 docker-compose up -d
 ```
+
+For Coolify deployment, ports are automatically assigned by the platform.
 
 ### Nginx Configuration
 
@@ -179,14 +222,16 @@ volumes:
 
 ```
 nginx-fileserver/
-├── Dockerfile              # Nginx Docker image definition
-├── nginx.conf              # Nginx server configuration
-├── docker-compose.yml      # Docker Compose configuration
-├── .gitignore              # Git ignore rules
-├── .dockerignore           # Docker ignore rules
-├── files/                  # Your files go here (git ignored)
+├── Dockerfile                   # Nginx Docker image definition
+├── Dockerfile.dufs              # Dufs Docker image definition
+├── nginx.conf                   # Nginx server configuration
+├── docker-compose.yml           # Docker Compose (local development)
+├── docker-compose-coolify.yml   # Docker Compose (Coolify deployment)
+├── .gitignore                   # Git ignore rules
+├── .dockerignore                # Docker ignore rules
+├── files/                       # Your files go here (git ignored)
 │   └── .gitkeep
-└── README.md               # This file
+└── README.md                    # This file
 ```
 
 ## Important Notes
@@ -318,9 +363,38 @@ Since nginx doesn't require authentication, you can embed files directly:
 
 MIT
 
+## Deployment
+
+### Local Development
+
+Use `docker-compose.yml` for local development. This file exposes ports via environment variables:
+
+```bash
+NGINX_PORT=8080 DUFS_PORT=5001 DUFS_AUTH="admin:password" docker-compose up -d
+```
+
+### Coolify Deployment
+
+Use `docker-compose-coolify.yml` for deploying to [Coolify](https://coolify.io/). This file omits port mappings as Coolify handles port management automatically:
+
+1. Push your code to a Git repository
+2. In Coolify, create a new application
+3. Point to your repository
+4. Set the following environment variables in Coolify:
+   - `DUFS_AUTH` - Authentication credentials (e.g., `admin:password`)
+5. Specify `docker-compose-coolify.yml` as the compose file
+6. Deploy
+
+Coolify will automatically:
+- Build both services using the Dockerfiles
+- Assign ports and domains
+- Handle SSL certificates
+- Manage restarts and health checks
+
 ## Support
 
 For issues and questions, please refer to:
 - [Nginx Documentation](https://nginx.org/en/docs/)
 - [Dufs GitHub Repository](https://github.com/sigoden/dufs)
 - [Dufs Documentation](https://github.com/sigoden/dufs#readme)
+- [Coolify Documentation](https://coolify.io/docs)

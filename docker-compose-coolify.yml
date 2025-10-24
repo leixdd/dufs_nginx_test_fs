@@ -4,8 +4,6 @@ services:
   nginx:
     build: .
     container_name: nginx-fileserver
-    ports:
-      - "${NGINX_PORT}:80"
     volumes:
       - ./files:/usr/share/nginx/html/files:ro
     restart: unless-stopped
@@ -15,8 +13,6 @@ services:
       context: .
       dockerfile: Dockerfile.dufs
     container_name: dufs-fileserver
-    ports:
-      - "${DUFS_PORT}:80"
     volumes:
       - ./files:/data:rw
     command: /data -A --allow-upload -a ${DUFS_AUTH}@/:rw --port 80
